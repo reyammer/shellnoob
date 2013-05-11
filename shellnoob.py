@@ -255,7 +255,7 @@ def ins_to_opcode(ins):
 def opcode_to_ins(opcode):
     _hex = opcode.replace(' ', '')
     obj = hex_to_obj(_hex)
-    shell = obj_to_shell(obj)
+    shell = obj_to_asm(obj)
 
     inss = shell.split('\n')
     ins = 'null'
