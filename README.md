@@ -3,6 +3,11 @@
 Writing shellcodes has always been super fun, but some parts are extremely
 boring and error prone. Focus only on the fun part, and use *ShellNoob*! 
 
+## News
+ShellNoob got accepted at Black Hat Arsenal! See announcement here: [link](http://www.blackhat.com/us-13/arsenal.html#Fratantonio).
+
+The new (updated) version will be publicly released during Black Hat Briefings.
+
 ## Features
 
 - convert shellcode between different formats (currently supported: asm, bin, hex, obj, exe, C, python, ruby, pretty)
