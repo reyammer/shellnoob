@@ -156,9 +156,9 @@ class ShellNoob():
 
 int main() {
     // make sure the memory is RWX to support self-modifying shellcode
-    char *target = (char *) memalign(4096, strlen(shellcode));
-    mprotect(target, strlen(shellcode), PROT_READ | PROT_WRITE | PROT_EXEC);
-    memcpy(target, shellcode, strlen(shellcode));
+    char *target = (char *) memalign(4096, sizeof(shellcode));
+    mprotect(target, sizeof(shellcode), PROT_READ | PROT_WRITE | PROT_EXEC);
+    memcpy(target, shellcode, sizeof(shellcode));
     (*(void (*)()) target)();
     return 0;
 }
