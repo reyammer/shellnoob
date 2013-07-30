@@ -115,6 +115,15 @@ class ShellNoob():
         'FreeBSD#i[2-6]?86#32#.*' : '-m elf_i386_fbsd'
     }
 
+    # {kernel-hardware-flag_64_bit-flag_intel}
+    gcc_options_map = {
+        'Linux#i[2-6]?86#32#.*' : '',
+        'Linux#x86_64#32#.*' : '-m32',
+        'Linux#x86_64#64#.*' : '',
+        'Linux#arm.*#32#.*' : '',
+        'FreeBSD#i[2-6]?86#32#.*' : '-m elf_i386_fbsd'
+    }
+
     # {kernel-hardware}
     breakpoint_hex_map = {
         '.*#i[2-6]?86' : 'cc',
@@ -273,6 +282,24 @@ int main() {
             if self.debug: print >>sys.stderr, 'MATCH with %s ~> %s' % (entry, options)
             return options
         raise ShellNoobException('ld_options not found for the current setup')
+
+
+    def get_gcc_options(self, kernel=None, hardware=None, flag_64_bit=None, flag_intel=None):
+        # use the passed settings, if specified
+        kernel = kernel if kernel is not None else self.kernel
+        hardware = hardware if hardware is not None else self.hardware
+        flag_64_bit = flag_64_bit if flag_64_bit is not None else self.flag_64_bit
+        flag_intel = flag_intel if flag_intel is not None else self.flag_intel
+
+        for entry, options in self.gcc_options_map.items():
+            e_kernel, e_hardware, e_64, e_intel = entry.split('#')
+            if not re.search(e_kernel, kernel): continue
+            if not re.search(e_hardware, hardware): continue
+            if not re.search(e_64, flag_64_bit): continue
+            if not re.search(e_intel, flag_intel): continue
+            if self.debug: print >>sys.stderr, 'MATCH with %s ~> %s' % (entry, options)
+            return options
+        raise ShellNoobException('gcc_options not found for the current setup')
 
 
     def get_breakpoint_hex(self, kernel=None, hardware=None):
@@ -727,8 +754,8 @@ int main() {
         if self.verbose >= 3: print >>sys.stderr, 'IN hex_to_exe'
         with_breakpoint = with_breakpoint if with_breakpoint is not None else self.with_breakpoint
 
-        obj = self.hex_to_obj(_hex, with_breakpoint)
-        exe = self.obj_to_exe(obj, with_breakpoint=False)
+        completec = self.hex_to_completec(_hex, with_breakpoint)
+        exe = self.c_to_exe(completec, with_breakpoint=False)
         if self.verbose >= 3: print >>sys.stderr, 'OUT hex_to_exe'
         return exe
 
@@ -984,8 +1011,8 @@ int main() {
         if self.verbose >= 3: print >>sys.stderr, 'IN asm_to_exe'
         with_breakpoint = with_breakpoint if with_breakpoint is not None else self.with_breakpoint
 
-        obj = self.asm_to_obj(asm, with_breakpoint)
-        exe = self.obj_to_exe(obj, with_breakpoint=False)
+        _hex = self.asm_to_hex(asm, with_breakpoint)
+        exe = self.hex_to_exe(_hex, with_breakpoint=False)
 
         if self.verbose >= 3: print >>sys.stderr, 'OUT asm_to_exe'
         return exe
@@ -1047,6 +1074,33 @@ int main() {
 
         if self.verbose >= 3: print >>sys.stderr, 'OUT hex_to_completec'
         return completec
+
+    def c_to_exe(self, c, with_breakpoint=None):
+        # NOTE assumption: the input is "compileable C"
+        if self.verbose >= 3: print >>sys.stderr, 'IN c_to_exe'
+
+        if with_breakpoint:
+            raise Exception('the with_breakpoint option is NOT supported in c_to_exe')
+
+        tmp_c_f = NamedTemporaryFile(suffix='.c', delete=False)
+        tmp_c_fp = tmp_c_f.name
+        tmp_c_f.write(c)
+        tmp_c_f.close()
+
+        tmp_exe_fp = mktemp()
+
+        gcc_options = self.get_gcc_options()
+        cmd = 'gcc %s -o %s %s' % (gcc_options, tmp_exe_fp, tmp_c_fp)
+        retval = self.exec_cmd(cmd, True, caller='c_to_exe')
+
+        exe = open(tmp_exe_fp, 'rb').read()
+
+        if not self.keep_files:
+            os.unlink(tmp_c_fp)
+            os.unlink(tmp_exe_fp)
+
+        if self.verbose >= 3: print >>sys.stderr, 'OUT c_to_exe'
+        return exe
 
 
     ########################
