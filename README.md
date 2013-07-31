@@ -213,6 +213,10 @@ arpl %si,0x65(%edx)   # .ascii "cre"
 je 0xa0               # .ascii "tX
 ```
 
+## Acknowledgments
+
+Huge **THANKS!** to the @ToolsWatch & Black Hat crews! :-)
+
 ## License
 
 ShellNoob is release under the MIT license. Check the COPYRIGHT file.
