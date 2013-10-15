@@ -21,6 +21,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+from __future__ import print_function
 __author__ = 'Yanick Fratantonio <yanick@cs.ucsb.edu>'
 __description__ = 'Toolkit to write shellcodes'
 __version__ = "2.0"
@@ -47,33 +48,33 @@ except ImportError:
 
 def print_usage():
     script_fn = os.path.basename(sys.argv[0])
-    print >>sys.stderr, '%s [--from-INPUT] (input_file_path | - ) [--to-OUTPUT] [output_file_path | - ]' % script_fn
-    print >>sys.stderr, '%s -c (prepend a breakpoint (Warning: only few platforms/OS are supported!)' % script_fn
-    print >>sys.stderr, '%s --64 (64 bits mode, default: 32 bits)' % script_fn
-    print >>sys.stderr, '%s --intel (intel syntax mode, default: att)' % script_fn
-    print >>sys.stderr, '%s -q (quite mode)' % script_fn
-    print >>sys.stderr, '%s -v (or -vv, -vvv)' % script_fn
-    print >>sys.stderr, '%s --to-strace (compiles it & run strace)' % script_fn
-    print >>sys.stderr, '%s --to-gdb (compiles it & run gdb & set breakpoint on entrypoint)' % script_fn
-    print >>sys.stderr, ''
-    print >>sys.stderr, 'Standalone "plugins"'
-    print >>sys.stderr, '%s -i [--to-asm | --to-opcode ] (for interactive mode)' % script_fn
-    print >>sys.stderr, '%s --get-const <const>' % script_fn
-    print >>sys.stderr, '%s --get-sysnum <sysnum>' % script_fn
-    print >>sys.stderr, '%s --get-strerror <errno>' % script_fn
-    print >>sys.stderr, '%s --file-patch <exe_fp> <file_offset> <data> (in hex). (Warning: tested only on x86/x86_64)' % script_fn
-    print >>sys.stderr, '%s --vm-patch <exe_fp> <vm_address> <data> (in hex). (Warning: tested only on x86/x86_64)' % script_fn
-    print >>sys.stderr, '%s --fork-nopper <exe_fp> (this nops out the calls to fork(). Warning: tested only on x86/x86_64)' % script_fn
-    print >>sys.stderr, ''
-    print >>sys.stderr, '"Installation"'
-    print >>sys.stderr, '%s --install [--force] (this just copies the script in a convinient position)' % script_fn
-    print >>sys.stderr, '%s --uninstall [--force]' % script_fn
-    print >>sys.stderr, ''
-    print >>sys.stderr, 'Supported INPUT format: %s' % ', '.join(ShellNoob.INPUT_FMT)
-    print >>sys.stderr, 'Supported OUTPUT format: %s'  % ', '.join(ShellNoob.OUTPUT_FMT)
-    print >>sys.stderr, 'All combinations from INPUT to OUTPUT are supported!'
-    print >>sys.stderr, ''
-    print >>sys.stderr, 'Check out the README file for more info.'
+    print('%s [--from-INPUT] (input_file_path | - ) [--to-OUTPUT] [output_file_path | - ]' % script_fn, file=sys.stderr)
+    print('%s -c (prepend a breakpoint (Warning: only few platforms/OS are supported!)' % script_fn, file=sys.stderr)
+    print('%s --64 (64 bits mode, default: 32 bits)' % script_fn, file=sys.stderr)
+    print('%s --intel (intel syntax mode, default: att)' % script_fn, file=sys.stderr)
+    print('%s -q (quite mode)' % script_fn, file=sys.stderr)
+    print('%s -v (or -vv, -vvv)' % script_fn, file=sys.stderr)
+    print('%s --to-strace (compiles it & run strace)' % script_fn, file=sys.stderr)
+    print('%s --to-gdb (compiles it & run gdb & set breakpoint on entrypoint)' % script_fn, file=sys.stderr)
+    print('', file=sys.stderr)
+    print('Standalone "plugins"', file=sys.stderr)
+    print('%s -i [--to-asm | --to-opcode ] (for interactive mode)' % script_fn, file=sys.stderr)
+    print('%s --get-const <const>' % script_fn, file=sys.stderr)
+    print('%s --get-sysnum <sysnum>' % script_fn, file=sys.stderr)
+    print('%s --get-strerror <errno>' % script_fn, file=sys.stderr)
+    print('%s --file-patch <exe_fp> <file_offset> <data> (in hex). (Warning: tested only on x86/x86_64)' % script_fn, file=sys.stderr)
+    print('%s --vm-patch <exe_fp> <vm_address> <data> (in hex). (Warning: tested only on x86/x86_64)' % script_fn, file=sys.stderr)
+    print('%s --fork-nopper <exe_fp> (this nops out the calls to fork(). Warning: tested only on x86/x86_64)' % script_fn, file=sys.stderr)
+    print('', file=sys.stderr)
+    print('"Installation"', file=sys.stderr)
+    print('%s --install [--force] (this just copies the script in a convinient position)' % script_fn, file=sys.stderr)
+    print('%s --uninstall [--force]' % script_fn, file=sys.stderr)
+    print('', file=sys.stderr)
+    print('Supported INPUT format: %s' % ', '.join(ShellNoob.INPUT_FMT), file=sys.stderr)
+    print('Supported OUTPUT format: %s'  % ', '.join(ShellNoob.OUTPUT_FMT), file=sys.stderr)
+    print('All combinations from INPUT to OUTPUT are supported!', file=sys.stderr)
+    print('', file=sys.stderr)
+    print('Check out the README file for more info.', file=sys.stderr)
 
 
 class ShellNoob():
@@ -185,12 +186,12 @@ int main() {
         for i in self.INPUT_FMT:
             for o in self.OUTPUT_FMT:
                 func_name = '%s_to_%s' % (i, o)
-                if self.debug: print >>sys.stderr, 'Creating %s' % func_name
+                if self.debug: print('Creating %s' % func_name, file=sys.stderr)
                 if i == o: continue
 
                 if func_name not in ShellNoob.__dict__:
                     # conversion not implemented: let's go through hex
-                    ShellNoob.__dict__[func_name] = self.gen_conv_function(i, o)
+                    setattr(ShellNoob, func_name, self.gen_conv_function(i, o))
 
     def gen_conv_function(self, input_fmt, output_fmt):
         # generate on-the-fly a conversion function going through the "hex" format
@@ -210,23 +211,23 @@ int main() {
         try:
             self.get_objdump_options()
         except ShellNoobException as e:
-            print >>sys.stderr, 'ERROR: %s' % e.message
+            print('ERROR: %s' % e.message, file=sys.stderr)
             sys.exit(2)
         try:
             self.get_as_options()
         except ShellNoobException as e:
-            print >>sys.stderr, 'ERROR: %s' % e.message
+            print('ERROR: %s' % e.message, file=sys.stderr)
             sys.exit(2)
         try:
             self.get_ld_options()
         except ShellNoobException as e:
-            print >>sys.stderr, 'ERROR: %s' % e.message
+            print('ERROR: %s' % e.message, file=sys.stderr)
             sys.exit(2)
         if self.with_breakpoint:
             try:
                 self.get_breakpoint_hex()
             except ShellNoobException as e:
-                print >>sys.stderr, 'ERROR: %s' % e.message
+                print('ERROR: %s' % e.message, file=sys.stderr)
                 sys.exit(2)
 
 
@@ -243,7 +244,7 @@ int main() {
             if not re.search(e_hardware, hardware): continue
             if not re.search(e_64, flag_64_bit): continue
             if not re.search(e_intel, flag_intel): continue
-            if self.debug: print >>sys.stderr, 'MATCH with %s ~> %s' % (entry, options)
+            if self.debug: print('MATCH with %s ~> %s' % (entry, options), file=sys.stderr)
             return options
         raise ShellNoobException('objdump_options not found for the current setup')
 
@@ -261,7 +262,7 @@ int main() {
             if not re.search(e_hardware, hardware): continue
             if not re.search(e_64, flag_64_bit): continue
             if not re.search(e_intel, flag_intel): continue
-            if self.debug: print >>sys.stderr, 'MATCH with %s ~> %s' % (entry, options)
+            if self.debug: print('MATCH with %s ~> %s' % (entry, options), file=sys.stderr)
             return options
         raise ShellNoobException('as_options not found for the current setup')
 
@@ -279,7 +280,7 @@ int main() {
             if not re.search(e_hardware, hardware): continue
             if not re.search(e_64, flag_64_bit): continue
             if not re.search(e_intel, flag_intel): continue
-            if self.debug: print >>sys.stderr, 'MATCH with %s ~> %s' % (entry, options)
+            if self.debug: print('MATCH with %s ~> %s' % (entry, options), file=sys.stderr)
             return options
         raise ShellNoobException('ld_options not found for the current setup')
 
@@ -297,7 +298,7 @@ int main() {
             if not re.search(e_hardware, hardware): continue
             if not re.search(e_64, flag_64_bit): continue
             if not re.search(e_intel, flag_intel): continue
-            if self.debug: print >>sys.stderr, 'MATCH with %s ~> %s' % (entry, options)
+            if self.debug: print('MATCH with %s ~> %s' % (entry, options), file=sys.stderr)
             return options
         raise ShellNoobException('gcc_options not found for the current setup')
 
@@ -311,7 +312,7 @@ int main() {
             e_kernel, e_hardware = entry.split('#')
             if not re.search(e_kernel, kernel): continue
             if not re.search(e_hardware, hardware): continue
-            if self.debug: print >>sys.stderr, 'MATCH with %s-%s ~> %s' % (e_kernel, e_hardware, _hex)
+            if self.debug: print('MATCH with %s-%s ~> %s' % (e_kernel, e_hardware, _hex), file=sys.stderr)
             return _hex
         raise ShellNoobException('the breakpoint feature is not supported in the current configuration')
 
@@ -324,7 +325,7 @@ int main() {
             e_kernel, e_hardware = entry.split('#')
             if not re.search(e_kernel, kernel): continue
             if not re.search(e_hardware, hardware): continue
-            if self.debug: print >>sys.stderr, 'MATCH with %s ~> %s' % (entry, comment_char)
+            if self.debug: print('MATCH with %s ~> %s' % (entry, comment_char), file=sys.stderr)
             return comment_char
 
 
@@ -350,16 +351,16 @@ int main() {
             try:
                 tmp_exe_fp = self.include_and_body_to_exe_fp(includes, body)
             except ShellNoobException:
-                print >>sys.stderr, 'ERROR: syscall %s not found for platform %s' % (syscall, platform)
+                print('ERROR: syscall %s not found for platform %s' % (syscall, platform), file=sys.stderr)
                 continue
 
             p = Popen(tmp_exe_fp, stdout=PIPE)
             output, error = p.communicate()
             retval = p.returncode
             if retval == 0:
-                print '%s ~> %s' % (platform, output)
+                print('%s ~> %s' % (platform, output))
             else:
-                print >>sys.stderr, 'ERROR: reval %s while resolving syscall %s' % (retval, syscall)
+                print('ERROR: reval %s while resolving syscall %s' % (retval, syscall), file=sys.stderr)
 
 
     def do_resolve_const(self, const):
@@ -372,16 +373,16 @@ int main() {
         try:
             tmp_exe_fp = self.include_and_body_to_exe_fp(includes, body)
         except ShellNoobException:
-            print >>sys.stderr, 'ERROR: constant %s not found' % const
+            print('ERROR: constant %s not found' % const, file=sys.stderr)
             return
 
         p = Popen(tmp_exe_fp, stdout=PIPE)
         output, error = p.communicate()
         retval = p.returncode
         if retval == 0:
-            print '%s ~> %s' % (const, int(output))
+            print('%s ~> %s' % (const, int(output)))
         else:
-            print >>sys.stderr, 'ERROR: reval %s while resolving const %s' % (retval, const)
+            print('ERROR: reval %s while resolving const %s' % (retval, const), file=sys.stderr)
 
 
     def do_resolve_errno(self, errno):
@@ -392,16 +393,16 @@ int main() {
         try:
             tmp_exe_fp = self.include_and_body_to_exe_fp(includes, body)
         except ShellNoobException:
-            print >>sys.stderr, 'ERROR: errno %s not found' % const
+            print('ERROR: errno %s not found' % const, file=sys.stderr)
             return
 
         p = Popen(tmp_exe_fp, stdout=PIPE)
         output, error = p.communicate()
         retval = p.returncode
         if retval == 0:
-            print '%s ~> %s' % (errno, output)
+            print('%s ~> %s' % (errno, output))
         else:
-            print >>sys.stderr, 'ERROR: reval %s while resolving errno %s' % (retval, errno)
+            print('ERROR: reval %s while resolving errno %s' % (retval, errno), file=sys.stderr)
 
 
     def do_interactive_mode(self, args):
@@ -411,53 +412,53 @@ int main() {
         elif '--to-asm' in args:
             asm_to_opcode_flag = False
         if asm_to_opcode_flag is None:
-            print 'asm_to_opcode (1) or opcode_to_asm (2)?:',
             answer = raw_input()
+            print('asm_to_opcode (1) or opcode_to_asm (2)?: ', end='')
             while answer != '1' and answer != '2':
-                print 'seriously? dude, choose between 1 and 2:',
                 answer = raw_input()
+                print('seriously? dude, choose between 1 and 2: ', end='')
             asm_to_opcode_flag = True if answer == '1' else False
         assert asm_to_opcode_flag is not None
         if asm_to_opcode_flag:
-            print 'asm_to_opcode selected (type "quit" or ^C to end)'
+            print('asm_to_opcode selected (type "quit" or ^C to end)')
             ins = ''
             quit = False
             while not quit:
                 while not ins:
-                    print '>>',
-                    ins = raw_input().strip(' \t\n')
+                    print('>> ', end='')
+                    ins = input().strip(' \t\n')
                     if ins.lower() == 'quit':
                         quit = True
                 if quit: continue
                 try:
                     _hex = self.ins_to_hex(ins)
-                    print '%s ~> %s' % (ins, _hex)
+                    print('%s ~> %s' % (ins, _hex))
                 except Exception as e:
-                    print >>sys.stderr, 'ERROR: %s' % e
+                    print('ERROR: %s' % e, file=sys.stderr)
                     if self.verbose >= 3:
-                        print >>sys.stderr, traceback.format_exc()
-                        print >>sys.stderr, '--------------------------'
+                        print(traceback.format_exc(), file=sys.stderr)
+                        print('--------------------------', file=sys.stderr)
                 ins = ''
         else:
-            print 'opcode_to_asm selected (type "quit" or ^C to end)'
+            print('opcode_to_asm selected (type "quit" or ^C to end)')
             _hex = ''
             quit = False
             while not quit:
                 while not _hex:
-                    print '>>',
                     _hex = raw_input().strip(' \t\n')
+                    print('>> ', end='')
                     if _hex.lower() == 'quit':
                         quit = True
                 if quit: continue
                 try:
                     _hex = _hex.replace(' ','').strip(' \t\n')
                     asm = self.hex_to_pretty(_hex)
-                    print '%s ~> %s' % (_hex, asm)
+                    print('%s ~> %s' % (cbytes(_hex), asm))
                 except Exception as e:
-                    print >>sys.stderr, 'ERROR: %s' % e
+                    print('ERROR: %s' % e, file=sys.stderr)
                     if self.verbose >= 3:
-                        print >>sys.stderr, traceback.format_exc()
-                        print >>sys.stderr, '--------------------------'
+                        print(traceback.format_exc(), file=sys.stderr)
+                        print('--------------------------', file=sys.stderr)
                 _hex = ''
 
 
@@ -471,7 +472,7 @@ int main() {
                 msg += 'to stdout (%s)' % output_fmt
             else:
                 msg += 'into %s (%s)' % (output_fp, output_fmt)
-            print >>sys.stderr, msg
+            print(msg, file=sys.stderr)
 
         # reading the input
         if input_fp == '-':
@@ -486,7 +487,7 @@ int main() {
         try:
             _output = getattr(self, conv_func_name)(_input)
         except AttributeError:
-            print >>sys.stderr, 'ERROR: conversion mode "%s" is not supported.' % conv_func_name
+            print('ERROR: conversion mode "%s" is not supported.' % conv_func_name, file=sys.stderr)
             sys.exit(2)
 
         # writing the output
@@ -500,7 +501,7 @@ int main() {
             os.chmod(output_fp, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
 
     def do_strace(self, input_fp, input_fmt):
-        if self.verbose >= 3: print >>sys.stderr, 'IN do_strace'
+        if self.verbose >= 3: print('IN do_strace', file=sys.stderr)
 
         exe_fp = mktemp()
 
@@ -511,10 +512,10 @@ int main() {
 
         if not self.keep_files:
             os.unlink(exe_fp)
-        if self.verbose >= 3: print >>sys.stderr, 'OUT do_strace'
+        if self.verbose >= 3: print('OUT do_strace', file=sys.stderr)
 
     def do_gdb(self, input_fp, input_fmt):
-        if self.verbose >= 3: print >>sys.stderr, 'IN do_gdb'
+        if self.verbose >= 3: print('IN do_gdb', file=sys.stderr)
 
         exe_fp = mktemp()
 
@@ -524,9 +525,9 @@ int main() {
         try:
             start_addr = self.get_start_address(exe_fp)
         except:
-            print >>sys.stderr, 'WARNING: failed to get the start address :-('
-            print >>sys.stderr, traceback.format_exc()
-            print >>sys.stderr, '------------------------'
+            print('WARNING: failed to get the start address :-(', file=sys.stderr)
+            print(traceback.format_exc(), file=sys.stderr)
+            print('------------------------', file=sys.stderr)
 
         if start_addr:
             cmd = '(echo "break *%s"; cat) | gdb -q %s' % (start_addr, exe_fp)
@@ -538,7 +539,7 @@ int main() {
         if not self.keep_files:
             os.unlink(exe_fp)
 
-        if self.verbose >= 3: print >>sys.stderr, 'OUT do_gdb'
+        if self.verbose >= 3: print('OUT do_gdb', file=sys.stderr)
 
 
     #############################
@@ -594,13 +595,13 @@ int main() {
     def do_fork_nopper(self, exe_fp):
         lines = os.popen('objdump -d %s' % exe_fp).read().split('\n')
         for line in lines:
-            print line
+            print(line)
             m = re.search('([0-9a-f]+):\s+[0-9a-f ]+\s+call.*fork', line)
             if not m: continue
             vm_address = int(m.group(1), 16)
-            print 'FOUND A CALL TO FORK @ 0x%x' % vm_address
+            print('FOUND A CALL TO FORK @ 0x%x' % vm_address)
             file_offset = self.get_file_offset_from_vm_address(exe_fp, vm_address)
-            print 'fileoffset @ 0x%x' % file_offset
+            print('fileoffset @ 0x%x' % file_offset)
             self.do_exe_patch(exe_fp, '\x90\x90\x90\x31\xc0', file_offset)
 
     def do_exe_patch(self, exe_fp, data, file_offset=None, vm_address=None, replace=True):
@@ -624,25 +625,25 @@ int main() {
     ###################
 
     def asm_to_hex(self, asm, with_breakpoint=None):
-        if self.verbose >= 3: print >>sys.stderr, 'IN asm_to_hex'
+        if self.verbose >= 3: print('IN asm_to_hex', file=sys.stderr)
         with_breakpoint = with_breakpoint if with_breakpoint is not None else self.with_breakpoint
 
         obj = self.asm_to_obj(asm, with_breakpoint)
         _hex = self.obj_to_hex(obj, with_breakpoint=False)
 
-        if self.verbose >= 3: print >>sys.stderr, 'OUT asm_to_hex'
+        if self.verbose >= 3: print('OUT asm_to_hex', file=sys.stderr)
         return _hex
 
     def bin_to_hex(self, _bin, with_breakpoint=None):
-        if self.verbose >= 3: print >>sys.stderr, 'IN bin_to_hex'
+        if self.verbose >= 3: print('IN bin_to_hex', file=sys.stderr)
         with_breakpoint = with_breakpoint if with_breakpoint is not None else self.with_breakpoint
 
         prepend = self.get_breakpoint_hex() if with_breakpoint else ''
-        if self.verbose >= 3: print >>sys.stderr, 'OUT bin_to_hex'
-        return prepend + _bin.encode('hex')
+        if self.verbose >= 3: print('OUT bin_to_hex', file=sys.stderr)
+        return prepend + str(binascii.b2a_hex(_bin))
 
     def obj_to_hex(self, obj, with_breakpoint=None):
-        if self.verbose >= 3: print >>sys.stderr, 'IN obj_to_hex'
+        if self.verbose >= 3: print('IN obj_to_hex', file=sys.stderr)
         with_breakpoint = with_breakpoint if with_breakpoint is not None else self.with_breakpoint
 
         tmp_obj_f = NamedTemporaryFile(delete=False)
@@ -666,14 +667,14 @@ int main() {
             os.unlink(tmp_obj_fp)
             os.unlink(tmp_bin_fp)
 
-        if self.verbose >= 3: print >>sys.stderr, 'OUT obj_to_hex'
+        if self.verbose >= 3: print('OUT obj_to_hex', file=sys.stderr)
         return _hex
 
     def c_to_hex(self, c, with_breakpoint=None):
-        if self.verbose >= 3: print >>sys.stderr, 'IN c_to_hex'
+        if self.verbose >= 3: print('IN c_to_hex', file=sys.stderr)
         with_breakpoint = with_breakpoint if with_breakpoint is not None else self.with_breakpoint
 
-        print >>sys.stderr, 'WARNING: c_to_hex just extracts the \\xXX looking parts. Check that everything it\'s fine!'
+        print('WARNING: c_to_hex just extracts the \\xXX looking parts. Check that everything it\'s fine!', file=sys.stderr)
 
         def get_next_hex(buf):
             slash_x_idx = buf.find('\\x')
@@ -690,14 +691,14 @@ int main() {
             _hex += hex_byte
         _hex = prepend + _hex
 
-        if self.verbose >= 3: print >>sys.stderr, 'OUT c_to_hex'
+        if self.verbose >= 3: print('OUT c_to_hex', file=sys.stderr)
         return _hex
 
     def shellstorm_to_hex(self, shellstorm_id, with_breakpoint=None):
-        if self.verbose >= 3: print >>sys.stderr, 'IN shellstorm_to_hex'
+        if self.verbose >= 3: print('IN shellstorm_to_hex', file=sys.stderr)
         with_breakpoint = with_breakpoint if with_breakpoint is not None else self.with_breakpoint
 
-        print >>sys.stderr, 'WARNING: shellstorm_to_hex just extracts the \\xXX looking parts. Check that everything it\'s fine!'
+        print('WARNING: shellstorm_to_hex just extracts the \\xXX looking parts. Check that everything it\'s fine!', file=sys.stderr)
 
         # TODO handle shellcode not found
 
@@ -712,7 +713,7 @@ int main() {
 
         _hex = self.c_to_hex(content, with_breakpoint)
 
-        if self.verbose >= 3: print >>sys.stderr, 'OUT shellstorm_to_hex'
+        if self.verbose >= 3: print('OUT shellstorm_to_hex', file=sys.stderr)
         return _hex
 
 
@@ -722,22 +723,22 @@ int main() {
     ################
 
     def hex_to_asm(self, _hex, with_breakpoint=None):
-        if self.verbose >= 3: print >>sys.stderr, 'IN hex_to_asm'
+        if self.verbose >= 3: print('IN hex_to_asm', file=sys.stderr)
         with_breakpoint = with_breakpoint if with_breakpoint is not None else self.with_breakpoint
 
         obj = self.hex_to_obj(_hex, with_breakpoint)
         asm = self.obj_to_asm(obj, with_breakpoint=False)
 
-        if self.verbose >= 3: print >>sys.stderr, 'OUT hex_to_asm'
+        if self.verbose >= 3: print('OUT hex_to_asm', file=sys.stderr)
         return asm
 
     def hex_to_obj(self, _hex, with_breakpoint=None):
-        if self.verbose >= 3: print >>sys.stderr, 'IN hex_to_obj'
+        if self.verbose >= 3: print('IN hex_to_obj', file=sys.stderr)
         with_breakpoint = with_breakpoint if with_breakpoint is not None else self.with_breakpoint
 
         if len(_hex) != 0 and _hex.endswith('\n'):
             _hex = _hex.rstrip('\n')
-            print >>sys.stderr, 'Warning: stripped a \'\\n\' at the end of the hex'
+            print('Warning: stripped a \'\\n\' at the end of the hex', file=sys.stderr)
         if len(_hex) == 0 or len(_hex) % 2 != 0:
             raise Exception('Not valid _hex: %s' % _hex)
 
@@ -747,41 +748,41 @@ int main() {
         asm = self.hex_to_asm_bytes(_hex)
         obj = self.asm_to_obj(asm, with_breakpoint=False)
 
-        if self.verbose >= 3: print >>sys.stderr, 'OUT hex_to_obj'
+        if self.verbose >= 3: print('OUT hex_to_obj', file=sys.stderr)
         return obj
 
     def hex_to_exe(self, _hex, with_breakpoint=None):
-        if self.verbose >= 3: print >>sys.stderr, 'IN hex_to_exe'
+        if self.verbose >= 3: print('IN hex_to_exe', file=sys.stderr)
         with_breakpoint = with_breakpoint if with_breakpoint is not None else self.with_breakpoint
 
         completec = self.hex_to_completec(_hex, with_breakpoint)
         exe = self.c_to_exe(completec, with_breakpoint=False)
-        if self.verbose >= 3: print >>sys.stderr, 'OUT hex_to_exe'
+        if self.verbose >= 3: print('OUT hex_to_exe', file=sys.stderr)
         return exe
 
     def hex_to_bin(self, _hex, with_breakpoint=None):
-        if self.verbose >= 3: print >>sys.stderr, 'IN hex_to_bin'
+        if self.verbose >= 3: print('IN hex_to_bin', file=sys.stderr)
         with_breakpoint = with_breakpoint if with_breakpoint is not None else self.with_breakpoint
 
         if len(_hex) != 0 and _hex.endswith('\n'):
             _hex = _hex.rstrip('\n')
-            print >>sys.stderr, 'Warning: stripped a \'\\n\' at the end of the hex'
+            print('Warning: stripped a \'\\n\' at the end of the hex', file=sys.stderr)
         if len(_hex) == 0 or len(_hex) % 2 != 0:
             raise Exception('Not valid _hex: %s' % _hex)
 
         prepend = self.get_breakpoint_hex() if with_breakpoint else ''
         _hex = prepend + _hex
 
-        if self.verbose >= 3: print >>sys.stderr, 'OUT hex_to_bin'
+        if self.verbose >= 3: print('OUT hex_to_bin', file=sys.stderr)
         return _hex.decode('hex')
 
     def hex_to_c(self, _hex, with_breakpoint=None):
-        if self.verbose >= 3: print >>sys.stderr, 'IN hex_to_c'
+        if self.verbose >= 3: print('IN hex_to_c', file=sys.stderr)
         with_breakpoint = with_breakpoint if with_breakpoint is not None else self.with_breakpoint
 
         if len(_hex) != 0 and _hex.endswith('\n'):
             _hex = _hex.rstrip('\n')
-            print >>sys.stderr, 'Warning: stripped a \'\\n\' at the end of the hex'
+            print('Warning: stripped a \'\\n\' at the end of the hex', file=sys.stderr)
         if len(_hex) == 0 or len(_hex) % 2 != 0:
             raise Exception('Not valid _hex: %s' % _hex)
 
@@ -793,16 +794,16 @@ int main() {
         for idx in range(0, len(_hex), 2):
             content += '\\x%s' % _hex[idx:idx+2]
         out = template % content
-        if self.verbose >= 3: print >>sys.stderr, 'OUT hex_to_c'
+        if self.verbose >= 3: print('OUT hex_to_c', file=sys.stderr)
         return out
 
     def hex_to_python(self, _hex, with_breakpoint=None):
-        if self.verbose >= 3: print >>sys.stderr, 'IN hex_to_python'
+        if self.verbose >= 3: print('IN hex_to_python', file=sys.stderr)
         with_breakpoint = with_breakpoint if with_breakpoint is not None else self.with_breakpoint
 
         if len(_hex) != 0 and _hex.endswith('\n'):
             _hex = _hex.rstrip('\n')
-            print >>sys.stderr, 'Warning: stripped a \'\\n\' at the end of the hex'
+            print('Warning: stripped a \'\\n\' at the end of the hex', file=sys.stderr)
         if len(_hex) == 0 or len(_hex) % 2 != 0:
             raise Exception('Not valid _hex: %s' % _hex)
 
@@ -815,39 +816,39 @@ int main() {
             content += '\\x%s' % _hex[idx:idx+2]
         out = template % content
 
-        if self.verbose >= 3: print >>sys.stderr, 'OUT hex_to_python'
+        if self.verbose >= 3: print('OUT hex_to_python', file=sys.stderr)
         return out
 
     def hex_to_bash(self, _hex, with_breakpoint=None):
-        if self.verbose >= 3: print >>sys.stderr, 'IN hex_to_bash'
+        if self.verbose >= 3: print('IN hex_to_bash', file=sys.stderr)
         with_breakpoint = with_breakpoint if with_breakpoint is not None else self.with_breakpoint
 
         out = self.hex_to_python(_hex, with_breakpoint)
 
-        if self.verbose >= 3: print >>sys.stderr, 'OUT hex_to_bash'
+        if self.verbose >= 3: print('OUT hex_to_bash', file=sys.stderr)
         return out
 
     class AreYouFuckingKiddingMeException(Exception):
         pass
 
     def hex_to_ruby(self, _hex, with_breakpoint=None):
-        if self.verbose >= 3: print >>sys.stderr, 'IN hex_to_ruby'
+        if self.verbose >= 3: print('IN hex_to_ruby', file=sys.stderr)
         with_breakpoint = with_breakpoint if with_breakpoint is not None else self.with_breakpoint
 
         # I'm not a ruby fan, and I really needed to put an easter egg :-)
         raise AreYouFuckingKiddingMeException()
 
     def hex_to_pretty(self, _hex, with_breakpoint=None):
-        if self.verbose >= 3: print >>sys.stderr, 'IN hex_to_pretty'
+        if self.verbose >= 3: print('IN hex_to_pretty', file=sys.stderr)
         with_breakpoint = with_breakpoint if with_breakpoint is not None else self.with_breakpoint
 
         obj = self.hex_to_obj(_hex, with_breakpoint)
         exe = self.obj_to_pretty(obj, with_breakpoint=False)
-        if self.verbose >= 3: print >>sys.stderr, 'OUT hex_to_pretty'
+        if self.verbose >= 3: print('OUT hex_to_pretty', file=sys.stderr)
         return exe
 
     def obj_to_pretty(self, obj, with_breakpoint=None):
-        if self.verbose >= 3: print >>sys.stderr, 'IN obj_to_pretty'
+        if self.verbose >= 3: print('IN obj_to_pretty', file=sys.stderr)
         with_breakpoint = with_breakpoint if with_breakpoint is not None else self.with_breakpoint
 
         if with_breakpoint:
@@ -855,9 +856,9 @@ int main() {
 
         if self.need_to_align():
             _hex = self.obj_to_hex(obj)
-            if self.debug: print >>sys.stderr, 'hex lenght: ',len(_hex)
+            if self.debug: print('hex lenght: ',len(_hex), file=sys.stderr)
             aligned_hex = self.align_hex(_hex)
-            if self.debug: print >>sys.stderr, 'aligned hex lenght: ' , len(aligned_hex)
+            if self.debug: print('aligned hex lenght: ' , len(aligned_hex), file=sys.stderr)
             if _hex != aligned_hex:
                 obj = self.hex_to_obj(aligned_hex, with_breakpoint=False)
 
@@ -890,7 +891,7 @@ int main() {
             os.unlink(tmp_obj_fp)
             os.unlink(tmp_pretty_fp)
 
-        if self.verbose >= 3: print >>sys.stderr, 'OUT obj_to_pretty'
+        if self.verbose >= 3: print('OUT obj_to_pretty', file=sys.stderr)
         return pretty
 
 
@@ -899,7 +900,7 @@ int main() {
     #########################
 
     def asm_to_obj(self, asm, with_breakpoint=None):
-        if self.verbose >= 3: print >>sys.stderr, 'IN asm_to_obj'
+        if self.verbose >= 3: print('IN asm_to_obj', file=sys.stderr)
         with_breakpoint = with_breakpoint if with_breakpoint is not None else self.with_breakpoint
 
         asm += '\n' # as complains if the asm doesn't end with newline
@@ -931,11 +932,11 @@ int main() {
             os.unlink(tmp_asm_fp)
             os.unlink(tmp_obj_fp)
 
-        if self.verbose >= 3: print >>sys.stderr, 'OUT asm_to_obj'
+        if self.verbose >= 3: print('OUT asm_to_obj', file=sys.stderr)
         return obj
 
     def obj_to_asm(self, obj, with_breakpoint=None):
-        if self.verbose >= 3: print >>sys.stderr, 'IN obj_to_asm'
+        if self.verbose >= 3: print('IN obj_to_asm', file=sys.stderr)
         with_breakpoint = with_breakpoint if with_breakpoint is not None else self.with_breakpoint
 
         if self.need_to_align():
@@ -953,7 +954,7 @@ int main() {
         cmd = 'objdump -d %s %s | tr -s " "' % (objdump_options,
                                     tmp_obj_fp,
                                    )
-        if self.verbose >= 2: print >>sys.stderr, '(obj_to_asm) Executing: %s' % cmd
+        if self.verbose >= 2: print('(obj_to_asm) Executing: %s' % cmd, file=sys.stderr)
         obj_out = os.popen(cmd).read()
         lines = obj_out.split('\n')
         started = False
@@ -1004,21 +1005,21 @@ int main() {
 
         shellcode = self.shellcode_t % out
 
-        if self.verbose >= 3: print >>sys.stderr, 'OUT obj_to_asm'
+        if self.verbose >= 3: print('OUT obj_to_asm', file=sys.stderr)
         return shellcode
 
     def asm_to_exe(self, asm, with_breakpoint=None):
-        if self.verbose >= 3: print >>sys.stderr, 'IN asm_to_exe'
+        if self.verbose >= 3: print('IN asm_to_exe', file=sys.stderr)
         with_breakpoint = with_breakpoint if with_breakpoint is not None else self.with_breakpoint
 
         _hex = self.asm_to_hex(asm, with_breakpoint)
         exe = self.hex_to_exe(_hex, with_breakpoint=False)
 
-        if self.verbose >= 3: print >>sys.stderr, 'OUT asm_to_exe'
+        if self.verbose >= 3: print('OUT asm_to_exe', file=sys.stderr)
         return exe
 
     def obj_to_exe(self, obj, with_breakpoint=None):
-        if self.verbose >= 3: print >>sys.stderr, 'IN obj_to_exe'
+        if self.verbose >= 3: print('IN obj_to_exe', file=sys.stderr)
         with_breakpoint = with_breakpoint if with_breakpoint is not None else self.with_breakpoint
 
         if with_breakpoint:
@@ -1043,16 +1044,16 @@ int main() {
             os.unlink(tmp_obj_fp)
             os.unlink(tmp_exe_fp)
 
-        if self.verbose >= 3: print >>sys.stderr, 'OUT obj_to_exe'
+        if self.verbose >= 3: print('OUT obj_to_exe', file=sys.stderr)
         return exe
 
     def hex_to_safeasm(self, _hex, with_breakpoint=None):
-        if self.verbose >= 3: print >>sys.stderr, 'IN hex_to_safeasm'
+        if self.verbose >= 3: print('IN hex_to_safeasm', file=sys.stderr)
         with_breakpoint = with_breakpoint if with_breakpoint is not None else self.with_breakpoint
 
         if len(_hex) != 0 and _hex.endswith('\n'):
             _hex = _hex.rstrip('\n')
-            print >>sys.stderr, 'Warning: stripped a \'\\n\' at the end of the hex'
+            print('Warning: stripped a \'\\n\' at the end of the hex', file=sys.stderr)
         if len(_hex) == 0 or len(_hex) % 2 != 0:
             raise Exception('Not valid _hex: %s' % _hex)
 
@@ -1062,22 +1063,22 @@ int main() {
         asm = self.hex_to_asm_bytes(_hex)
         shellcode = self.shellcode_t % asm
 
-        if self.verbose >= 3: print >>sys.stderr, 'OUT hex_to_safeasm'
+        if self.verbose >= 3: print('OUT hex_to_safeasm', file=sys.stderr)
         return shellcode
 
     def hex_to_completec(self, _hex, with_breakpoint=None):
-        if self.verbose >= 3: print >>sys.stderr, 'IN hex_to_completec'
+        if self.verbose >= 3: print('IN hex_to_completec', file=sys.stderr)
         with_breakpoint = with_breakpoint if with_breakpoint is not None else self.with_breakpoint
 
         c = self.hex_to_c(_hex, with_breakpoint)
         completec = self.completec_t % c
 
-        if self.verbose >= 3: print >>sys.stderr, 'OUT hex_to_completec'
+        if self.verbose >= 3: print('OUT hex_to_completec', file=sys.stderr)
         return completec
 
     def c_to_exe(self, c, with_breakpoint=None):
         # NOTE assumption: the input is "compileable C"
-        if self.verbose >= 3: print >>sys.stderr, 'IN c_to_exe'
+        if self.verbose >= 3: print('IN c_to_exe', file=sys.stderr)
 
         if with_breakpoint:
             raise Exception('the with_breakpoint option is NOT supported in c_to_exe')
@@ -1099,7 +1100,7 @@ int main() {
             os.unlink(tmp_c_fp)
             os.unlink(tmp_exe_fp)
 
-        if self.verbose >= 3: print >>sys.stderr, 'OUT c_to_exe'
+        if self.verbose >= 3: print('OUT c_to_exe', file=sys.stderr)
         return exe
 
 
@@ -1189,7 +1190,7 @@ int main() {
         raise Exception('start address not found for %s' % exe_fp)
 
     def exec_cmd(self, cmd, redirect_stderr=False, caller=None):
-        if self.verbose >= 2: print >>sys.stderr, '(exec_cmd: "%s") Executing: "%s"' % (caller, cmd)
+        if self.verbose >= 2: print('(exec_cmd: "%s") Executing: "%s"' % (caller, cmd), file=sys.stderr)
 
         if redirect_stderr:
             with open('/dev/null', 'wb') as f:
@@ -1197,7 +1198,7 @@ int main() {
         else:
             retval = call(cmd, shell=True)
 
-        if self.verbose >= 2: print >>sys.stderr, '(exec_cmd: "%s") Ret value: %s' % (caller, retval)
+        if self.verbose >= 2: print('(exec_cmd: "%s") Ret value: %s' % (caller, retval), file=sys.stderr)
         return retval
 
     def do_objdump_switch(self):
@@ -1220,7 +1221,7 @@ int main() {
         hardware = hardware if hardware is not None else self.hardware
         for e_hardware in self.hw_with_align:
             if not re.search(e_hardware, hardware): continue
-            if self.debug: print >>sys.stderr, 'MATCH with %s ~> %s' % (entry, options)
+            if self.debug: print('MATCH with %s ~> %s' % (entry, options), file=sys.stderr)
             return True
         return False
 
@@ -1243,27 +1244,27 @@ int main() {
     @staticmethod
     def do_install(force=False):
         if os.getuid() != 0:
-            print >>sys.stderr, 'ERROR: I need root!'
+            print('ERROR: I need root!', file=sys.stderr)
             sys.exit(1)
         install_dir = '/usr/local/bin'
         shellnoob_fp = os.path.join(install_dir, 'snoob')
-        print >>sys.stderr, 'This will copy shellnoob into %s' % shellnoob_fp
+        print('This will copy shellnoob into %s' % shellnoob_fp, file=sys.stderr)
         if not force:
             raw_input('Press a key to proceed..')
         shutil.copyfile(__file__, shellnoob_fp)
         os.chmod(shellnoob_fp, stat.S_IRWXU | stat.S_IRWXG | stat.S_IROTH | stat.S_IXOTH)
-        print >>sys.stderr, 'SUCCESS. "snoob -h" should display shellnoob\'s help'
+        print('SUCCESS. "snoob -h" should display shellnoob\'s help', file=sys.stderr)
 
     @staticmethod
     def do_uninstall(force=False):
         if os.getuid() != 0:
-            print >>sys.stderr, 'ERROR: I need root!'
+            print('ERROR: I need root!', file=sys.stderr)
             sys.exit(1)
         install_dir = '/usr/local/bin'
         shellnoob_fp = os.path.join(install_dir, 'snoob')
-        print >>sys.stderr, 'This will delete shellnoob from %s' % shellnoob_fp
+        print('This will delete shellnoob from %s' % shellnoob_fp, file=sys.stderr)
         if not force:
-            raw_input('Press a key to proceed..')
+            input('Press a key to proceed..')
         os.unlink(shellnoob_fp)
 
 
@@ -1426,11 +1427,11 @@ def main():
 
 
     if do_strace_flag:
-        if snoob.verbose >= 1: print >>sys.stderr, 'do_strace mode selected'
+        if snoob.verbose >= 1: print('do_strace mode selected', file=sys.stderr)
         snoob.do_strace(input_fp, input_fmt)
         sys.exit(0)
     if do_gdb_flag:
-        if snoob.verbose >= 1: print >>sys.stderr, 'do_gdb mode selected'
+        if snoob.verbose >= 1: print('do_gdb mode selected', file=sys.stderr)
         snoob.do_gdb(input_fp, input_fmt)
         sys.exit(0)
 
