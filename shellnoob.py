@@ -36,11 +36,15 @@ import socket
 import urllib
 from tempfile import mktemp, NamedTemporaryFile
 from subprocess import call, Popen, PIPE
+PY2 = sys.version_info.major == 2
+
 try:
     import IPython
 except ImportError:
     pass
 
+if PY2:
+    input = raw_input
 
 ######################
 ### main functions ###
@@ -412,11 +416,11 @@ int main() {
         elif '--to-asm' in args:
             asm_to_opcode_flag = False
         if asm_to_opcode_flag is None:
-            answer = raw_input()
             print('asm_to_opcode (1) or opcode_to_asm (2)?: ', end='')
+            answer = input()
             while answer != '1' and answer != '2':
-                answer = raw_input()
                 print('seriously? dude, choose between 1 and 2: ', end='')
+                answer = input()
             asm_to_opcode_flag = True if answer == '1' else False
         assert asm_to_opcode_flag is not None
         if asm_to_opcode_flag:
@@ -445,8 +449,8 @@ int main() {
             quit = False
             while not quit:
                 while not _hex:
-                    _hex = raw_input().strip(' \t\n')
                     print('>> ', end='')
+                    _hex = input().strip(' \t\n')
                     if _hex.lower() == 'quit':
                         quit = True
                 if quit: continue
@@ -1250,7 +1254,7 @@ int main() {
         shellnoob_fp = os.path.join(install_dir, 'snoob')
         print('This will copy shellnoob into %s' % shellnoob_fp, file=sys.stderr)
         if not force:
-            raw_input('Press a key to proceed..')
+            input('Press a key to proceed..')
         shutil.copyfile(__file__, shellnoob_fp)
         os.chmod(shellnoob_fp, stat.S_IRWXU | stat.S_IRWXG | stat.S_IROTH | stat.S_IXOTH)
         print('SUCCESS. "snoob -h" should display shellnoob\'s help', file=sys.stderr)
