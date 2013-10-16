@@ -351,7 +351,7 @@ int main() {
             symbol = 'SYS_%s' % syscall
         body = 'printf("%%d", %s); return 0;' % (symbol)
 
-        for platform, includes in platforms.items():
+        for platform, includes in reversed(sorted(platforms.items())):
             try:
                 tmp_exe_fp = self.include_and_body_to_exe_fp(includes, body)
             except ShellNoobException:
