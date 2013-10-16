@@ -201,7 +201,7 @@ def test_conversion(with_breakpoint=False):
 
     shutil.rmtree(tmp_dir)
 
-    return stdout, stderr, 0
+    return stdout.strip(), stderr, 0
 
 
 def test_get_start_address():
