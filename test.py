@@ -197,7 +197,7 @@ def test_conversion(with_breakpoint=False):
 
     _out, _err, _val = run_with_args('%s --to-exe' % asm_fp)
     assert os.popen(exe_fp).read().rstrip() == SECRET_STR
-    print 'Output of the shellcode matches!'
+    print('Output of the shellcode matches!')
 
     shutil.rmtree(tmp_dir)
 
@@ -242,7 +242,7 @@ def test_interactive(_input, args):
 def run_with_args_input(_input='', args=''):
     args += ' -q'
     cmd = '%s %s' % (SHELLNOOB_FP, args)
-    print 'Launching: %s (with input)' % (cmd)
+    print('Launching: %s (with input)' % (cmd))
     p = Popen(cmd, shell=True, stdin=PIPE, stdout=PIPE, stderr=PIPE)
     stdout, stderr = p.communicate(input=cbytes(_input, 'utf-8'))
     retval = p.returncode
@@ -253,7 +253,7 @@ def run_with_args_input(_input='', args=''):
 def run_with_args(args=''):
     args += ' -q'
     cmd = '%s %s' % (SHELLNOOB_FP, args)
-    print 'Launching: %s' % cmd
+    print('Launching: %s' % cmd)
     p = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE)
     stdout, stderr = p.communicate(input='')
     retval = p.returncode
@@ -270,36 +270,36 @@ def run_all_tests():
     try:
         tests = supported_features[entry]
     except KeyError:
-        print 'ERROR: No tests for this setup "%s"' % entry
+        print('ERROR: No tests for this setup "%s"' % entry)
         sys.exit(1)
     for test_name, entries in tests.items():
         for e in entries:
             tot_test += 1
             _input, expected = e
-            print 'Running test %s - %s - %s' % (test_name, _input, str(expected))
+            print('Running test %s - %s - %s' % (test_name, _input, str(expected)))
             e_stdout, e_stderr, e_retval = expected
             try:
                 stdout, stderr, retval = globals()[test_name](*_input)
                 if not re.search(e_stdout, stdout):
-                    print RED + 'ERROR STDOUT %s != %s (expected)' % (stdout, e_stdout) + ENDC
+                    print(RED + 'ERROR STDOUT %s != %s (expected)' % (stdout, e_stdout) + ENDC)
                     continue
                 if not re.search(e_stderr, stderr):
-                    print RED + 'ERROR STDERR?g %s != %s (expected)' % (stderr, e_stderr) + ENDC
+                    print(RED + 'ERROR STDERR?g %s != %s (expected)' % (stderr, e_stderr) + ENDC)
                     continue
                 if retval != e_retval:
-                    print RED + 'ERROR RETVAL %s != %s (expected)' % (retval, e_retval) + ENDC
+                    print(RED + 'ERROR RETVAL %s != %s (expected)' % (retval, e_retval) + ENDC)
                     continue
-                print GREEN + 'OK' + ENDC
+                print(GREEN + 'OK' + ENDC)
                 ok_test += 1
             except Exception as e:
-                print RED + 'ERROR Exception while executing %s' % test_name + ENDC
-                print traceback.format_exc()
-                print '---------------------------'
+                print(RED + 'ERROR Exception while executing %s' % test_name + ENDC)
+                print(traceback.format_exc())
+                print('---------------------------')
 
     if ok_test == tot_test:
-        print GREEN + '%s/%s OK' % (ok_test, tot_test) + ENDC
+        print(GREEN + '%s/%s OK' % (ok_test, tot_test) + ENDC)
     else:
-        print RED + '%s/%s ERROR' % (ok_test, tot_test) + ENDC
+        print(RED + '%s/%s ERROR' % (ok_test, tot_test) + ENDC)
 
 
 
@@ -312,8 +312,8 @@ def main():
         try:
             globals()[test_name]()
         except Exception as e:
-            print 'ERROR EXCEPTION while running test %s' % test_name
-            print traceback.format_exc()
+            print('ERROR EXCEPTION while running test %s' % test_name)
+            print(traceback.format_exc())
         sys.exit(0)
 
     run_all_tests()
