@@ -244,10 +244,10 @@ def run_with_args_input(_input='', args=''):
     cmd = '%s %s' % (SHELLNOOB_FP, args)
     print('Launching: %s (with input)' % (cmd))
     p = Popen(cmd, shell=True, stdin=PIPE, stdout=PIPE, stderr=PIPE)
-    stdout, stderr = p.communicate(input=cbytes(_input, 'utf-8'))
+    stdout, stderr = p.communicate(input=cbytes(_input))
     retval = p.returncode
 
-    return cstr(stdout, 'utf-8'), cstr(stderr, 'utf-8'), int(retval)
+    return cstr(stdout), cstr(stderr), int(retval)
 
 
 def run_with_args(args=''):
@@ -258,7 +258,7 @@ def run_with_args(args=''):
     stdout, stderr = p.communicate(input='')
     retval = p.returncode
 
-    return cstr(stdout, 'utf-8'), cstr(stderr, 'utf-8'), int(retval)
+    return cstr(stdout), cstr(stderr), int(retval)
 
 def run_all_tests():
     kernel, hardware = ShellNoob.get_kernel(), ShellNoob.get_hardware()
