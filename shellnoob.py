@@ -36,6 +36,7 @@ import socket
 import urllib
 from tempfile import mktemp, NamedTemporaryFile
 from subprocess import call, Popen, PIPE
+import binascii
 PY2 = sys.version_info.major == 2
 
 try:
@@ -45,6 +46,11 @@ except ImportError:
 
 if PY2:
     input = raw_input
+    cbytes = lambda source, encoding: bytes(source)
+    cstr = lambda source, encoding: str(source)
+else:
+    cbytes = lambda source, encoding: bytes(source, encoding)
+    cstr = lambda source, encoding: str(source, encoding)
 
 ######################
 ### main functions ###
@@ -338,6 +344,7 @@ int main() {
     ######################
 
     def do_resolve_syscall(self, syscall, kernel=None, hardware=None):
+        global cstr
         kernel = kernel if kernel is not None else self.kernel
         hardware = hardware if hardware is not None else self.hardware
 
@@ -362,7 +369,7 @@ int main() {
             output, error = p.communicate()
             retval = p.returncode
             if retval == 0:
-                print('%s ~> %s' % (platform, output))
+                print('%s ~> %s' % (platform, cstr(output, "utf-8")))
             else:
                 print('ERROR: reval %s while resolving syscall %s' % (retval, syscall), file=sys.stderr)
 
@@ -390,6 +397,7 @@ int main() {
 
 
     def do_resolve_errno(self, errno):
+        global cstr
         includes = ['string.h']
 
         body = 'printf("%%s", strerror(%s)); return 0;' % (errno)
@@ -404,12 +412,13 @@ int main() {
         output, error = p.communicate()
         retval = p.returncode
         if retval == 0:
-            print('%s ~> %s' % (errno, output))
+            print('%s ~> %s' % (errno, cstr(output, "utf-8")))
         else:
             print('ERROR: reval %s while resolving errno %s' % (retval, errno), file=sys.stderr)
 
 
     def do_interactive_mode(self, args):
+        global cbytes
         asm_to_opcode_flag = None
         if '--to-opcode' in args:
             asm_to_opcode_flag = True
@@ -457,7 +466,7 @@ int main() {
                 try:
                     _hex = _hex.replace(' ','').strip(' \t\n')
                     asm = self.hex_to_pretty(_hex)
-                    print('%s ~> %s' % (cbytes(_hex), asm))
+                    print('%s ~> %s' % (cbytes(_hex, 'utf-8'), asm))
                 except Exception as e:
                     print('ERROR: %s' % e, file=sys.stderr)
                     if self.verbose >= 3:
@@ -467,6 +476,7 @@ int main() {
 
 
     def do_conversion(self, input_fp, output_fp, input_fmt, output_fmt):
+        global cbytes
         if self.verbose >= 0:
             if input_fmt == '-':
                 msg = 'Converting from stdin (%s) ' % input_fmt
@@ -494,6 +504,8 @@ int main() {
             print('ERROR: conversion mode "%s" is not supported.' % conv_func_name, file=sys.stderr)
             sys.exit(2)
 
+        if not isinstance(_output, bytes):
+            _output = cbytes(_output, 'utf-8')
         # writing the output
         if output_fp == '-':
             sys.stdout.write(_output)
@@ -629,22 +641,23 @@ int main() {
     ###################
 
     def asm_to_hex(self, asm, with_breakpoint=None):
+        global cstr
         if self.verbose >= 3: print('IN asm_to_hex', file=sys.stderr)
         with_breakpoint = with_breakpoint if with_breakpoint is not None else self.with_breakpoint
-
         obj = self.asm_to_obj(asm, with_breakpoint)
         _hex = self.obj_to_hex(obj, with_breakpoint=False)
 
         if self.verbose >= 3: print('OUT asm_to_hex', file=sys.stderr)
-        return _hex
+        return cstr(_hex, 'utf-8')
 
     def bin_to_hex(self, _bin, with_breakpoint=None):
+        global cbytes
         if self.verbose >= 3: print('IN bin_to_hex', file=sys.stderr)
         with_breakpoint = with_breakpoint if with_breakpoint is not None else self.with_breakpoint
 
         prepend = self.get_breakpoint_hex() if with_breakpoint else ''
         if self.verbose >= 3: print('OUT bin_to_hex', file=sys.stderr)
-        return prepend + str(binascii.b2a_hex(_bin))
+        return cbytes(prepend, 'utf-8') + binascii.hexlify(_bin)
 
     def obj_to_hex(self, obj, with_breakpoint=None):
         if self.verbose >= 3: print('IN obj_to_hex', file=sys.stderr)
@@ -740,6 +753,8 @@ int main() {
         if self.verbose >= 3: print('IN hex_to_obj', file=sys.stderr)
         with_breakpoint = with_breakpoint if with_breakpoint is not None else self.with_breakpoint
 
+        if not isinstance(_hex, str):
+            _hex = cstr(_hex, 'utf-8')
         if len(_hex) != 0 and _hex.endswith('\n'):
             _hex = _hex.rstrip('\n')
             print('Warning: stripped a \'\\n\' at the end of the hex', file=sys.stderr)
@@ -765,9 +780,12 @@ int main() {
         return exe
 
     def hex_to_bin(self, _hex, with_breakpoint=None):
+        global cstr
         if self.verbose >= 3: print('IN hex_to_bin', file=sys.stderr)
         with_breakpoint = with_breakpoint if with_breakpoint is not None else self.with_breakpoint
 
+        if not isinstance(_hex, str):
+            _hex = cstr(_hex, 'utf-8')
         if len(_hex) != 0 and _hex.endswith('\n'):
             _hex = _hex.rstrip('\n')
             print('Warning: stripped a \'\\n\' at the end of the hex', file=sys.stderr)
@@ -778,12 +796,14 @@ int main() {
         _hex = prepend + _hex
 
         if self.verbose >= 3: print('OUT hex_to_bin', file=sys.stderr)
-        return _hex.decode('hex')
+        return binascii.unhexlify(_hex)
 
     def hex_to_c(self, _hex, with_breakpoint=None):
         if self.verbose >= 3: print('IN hex_to_c', file=sys.stderr)
         with_breakpoint = with_breakpoint if with_breakpoint is not None else self.with_breakpoint
 
+        if not isinstance(_hex, str):
+            _hex = cstr(_hex, 'utf-8')
         if len(_hex) != 0 and _hex.endswith('\n'):
             _hex = _hex.rstrip('\n')
             print('Warning: stripped a \'\\n\' at the end of the hex', file=sys.stderr)
@@ -802,9 +822,12 @@ int main() {
         return out
 
     def hex_to_python(self, _hex, with_breakpoint=None):
+        global cstr
         if self.verbose >= 3: print('IN hex_to_python', file=sys.stderr)
         with_breakpoint = with_breakpoint if with_breakpoint is not None else self.with_breakpoint
 
+        if not isinstance(_hex, str):
+            _hex = cstr(_hex, 'utf-8')
         if len(_hex) != 0 and _hex.endswith('\n'):
             _hex = _hex.rstrip('\n')
             print('Warning: stripped a \'\\n\' at the end of the hex', file=sys.stderr)
@@ -904,17 +927,18 @@ int main() {
     #########################
 
     def asm_to_obj(self, asm, with_breakpoint=None):
+        global cstr
         if self.verbose >= 3: print('IN asm_to_obj', file=sys.stderr)
         with_breakpoint = with_breakpoint if with_breakpoint is not None else self.with_breakpoint
 
-        asm += '\n' # as complains if the asm doesn't end with newline
-
+        if isinstance(asm, bytes):
+            asm = cstr(asm, 'utf-8')
         prepend = self.hex_to_asm_bytes(self.get_breakpoint_hex()) if with_breakpoint else ''
-        asm = prepend + asm
 
+        asm = prepend + asm + '\n'
         tmp_asm_f = NamedTemporaryFile(delete=False)
         tmp_asm_fp = tmp_asm_f.name
-        tmp_asm_f.write(asm)
+        tmp_asm_f.write(asm.encode("utf-8"))
         tmp_asm_f.close()
 
         tmp_obj_fp = mktemp()
@@ -982,7 +1006,7 @@ int main() {
             _hex = m.group(1).replace(' ', '').strip(' \t\n')
             help_asm = self.hex_to_asm_bytes(_hex).rstrip('\n')
             try:
-                _ascii = '.ascii "%s"' % _hex.decode('hex').decode('ascii')
+                _ascii = '.ascii "%s"' % _hex
                 _ascii = _ascii.strip(' \t\n')
             except UnicodeDecodeError:
                 _ascii = ''
@@ -1052,9 +1076,12 @@ int main() {
         return exe
 
     def hex_to_safeasm(self, _hex, with_breakpoint=None):
+        global cstr
         if self.verbose >= 3: print('IN hex_to_safeasm', file=sys.stderr)
         with_breakpoint = with_breakpoint if with_breakpoint is not None else self.with_breakpoint
 
+        if not isinstance(_hex, str):
+            _hex = cstr(_hex, 'utf-8')
         if len(_hex) != 0 and _hex.endswith('\n'):
             _hex = _hex.rstrip('\n')
             print('Warning: stripped a \'\\n\' at the end of the hex', file=sys.stderr)
@@ -1081,12 +1108,15 @@ int main() {
         return completec
 
     def c_to_exe(self, c, with_breakpoint=None):
+        global cbytes
         # NOTE assumption: the input is "compileable C"
         if self.verbose >= 3: print('IN c_to_exe', file=sys.stderr)
 
         if with_breakpoint:
             raise Exception('the with_breakpoint option is NOT supported in c_to_exe')
 
+        if not isinstance(c, bytes):
+            c = cbytes(c, 'utf-8')
         tmp_c_f = NamedTemporaryFile(suffix='.c', delete=False)
         tmp_c_fp = tmp_c_f.name
         tmp_c_f.write(c)
@@ -1123,7 +1153,7 @@ int main() {
         inss = filter(lambda i:i.strip(' \t'), inss)
         inss = map(lambda i:i.split('#')[0], inss)
         inss = map(lambda i:i.strip(' \t'), inss)
-        return inss
+        return list(inss)
 
     def inss_to_asm(self, inss):
         out = '\n'.join(inss)
@@ -1149,6 +1179,7 @@ int main() {
         return asm
 
     def include_and_body_to_exe_fp(self, includes, body):
+        global cbytes
         std_includes = set(('stdio.h', 'stdlib.h', 'errno.h'))
         includes = set(includes)
         includes.update(std_includes)
@@ -1165,7 +1196,7 @@ int main() {
         tmp_exe_fp = mktemp()
 
         with open(tmp_c_fp, 'wb') as f:
-            f.write(c_prog)
+            f.write(cbytes(c_prog, 'utf-8'))
 
         cmd = 'gcc %s -o %s' % (tmp_c_fp, tmp_exe_fp)
         retval = self.exec_cmd(cmd, 'include_and_body_to_exe_fp')
@@ -1184,6 +1215,7 @@ int main() {
         _out, _err = p.communicate()
         assert p.returncode == 0
 
+        _out = cstr(_out, 'utf-8')
         for line in _out.split('\n'):
             line = line.strip(' \t\n')
             m = re.search('^start address (0x[0-9a-f]+)$', line)
