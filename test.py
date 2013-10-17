@@ -112,7 +112,8 @@ def test_conversion(with_breakpoint=False):
     pretty_fp = join(tmp_dir, 'shellcode.pretty')
     safeasm_fp = join(tmp_dir, 'shellcode.safeasm')
 
-    os.system('echo "%s" > /tmp/secret' % SECRET_STR)
+    secret_fp = '/tmp/secret'
+    os.system('echo "%s" > %s' % (SECRET_STR, secret_fp))
 
     kernel = ShellNoob.get_kernel()
     if kernel == 'Linux':
@@ -200,7 +201,7 @@ def test_conversion(with_breakpoint=False):
     print('Output of the shellcode matches!')
 
     shutil.rmtree(tmp_dir)
-
+    os.unlink(secret_fp)
     return stdout.strip(), stderr, 0
 
 
@@ -211,7 +212,8 @@ def test_get_start_address():
     asm_fp = join(tmp_dir, 'shellcode.asm')
     exe_fp = join(tmp_dir, 'shellcode.exe')
 
-    os.system('echo "%s" > /tmp/secret' % SECRET_STR)
+    secret_fp = '/tmp/secret'
+    os.system('echo "%s" > %s' % (SECRET_STR, secret_fp))
 
     kernel = ShellNoob.get_kernel()
     if kernel == 'Linux':
@@ -228,6 +230,8 @@ def test_get_start_address():
     start_addr = snoob.get_start_address(exe_fp)
     assert re.match('0x[0-9a-f]+', start_addr)
 
+    shutil.rmtree(tmp_dir)
+    os.unlink(secret_fp)
     return stdout, stderr, 0
 
 

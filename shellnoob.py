@@ -372,6 +372,8 @@ int main() {
                 print('%s ~> %s' % (platform, cstr(output, "utf-8")))
             else:
                 print('ERROR: reval %s while resolving syscall %s' % (retval, syscall), file=sys.stderr)
+            if not self.keep_files:
+                os.unlink(tmp_exe_fp)
 
 
     def do_resolve_const(self, const):
@@ -394,6 +396,8 @@ int main() {
             print('%s ~> %s' % (const, int(output)))
         else:
             print('ERROR: reval %s while resolving const %s' % (retval, const), file=sys.stderr)
+        if not self.keep_files:
+            os.unlink(tmp_exe_fp)
 
 
     def do_resolve_errno(self, errno):
@@ -415,6 +419,8 @@ int main() {
             print('%s ~> %s' % (errno, cstr(output, "utf-8")))
         else:
             print('ERROR: reval %s while resolving errno %s' % (retval, errno), file=sys.stderr)
+        if not self.keep_files:
+            os.unlink(tmp_exe_fp)
 
 
     def do_interactive_mode(self, args):
