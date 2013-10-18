@@ -1422,14 +1422,14 @@ def main():
         idx = args.index('--file-patch')
         exe_fp = args[idx+1]
         file_offset = int(args[idx+2], 16)
-        data = args[idx+3].decode('hex')
+        data = binascii.unhexlify(args[idx+3])
         snoob.do_exe_patch(exe_fp, data, file_offset=file_offset)
         sys.exit(0)
     if '--vm-patch' in args:
         idx = args.index('--vm-patch')
         exe_fp = args[idx+1]
         vm_address = int(args[idx+2], 16)
-        data = args[idx+3].decode('hex')
+        data = binascii.unhexlify(args[idx+3])
         snoob.do_exe_patch(exe_fp, data, vm_address=vm_address)
         sys.exit(0)
 
