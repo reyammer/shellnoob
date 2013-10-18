@@ -48,9 +48,12 @@ if PY2:
     input = raw_input
     cbytes = lambda source, encoding='utf-8': bytes(source)
     cstr = lambda source, encoding='utf-8': str(source)
+    urlread = lambda url: urllib.urlopen(url).read()
 else:
+    import urllib.request
     cbytes = lambda source, encoding='utf-8': bytes(source, encoding)
     cstr = lambda source, encoding='utf-8': str(source, encoding)
+    urlread = lambda url: urllib.request.urlopen(url).read()
 
 ######################
 ### main functions ###
@@ -506,8 +509,10 @@ int main() {
         conv_func_name = '%s_to_%s' % (input_fmt, output_fmt)
         try:
             _output = getattr(self, conv_func_name)(_input)
-        except AttributeError:
+        except AttributeError as err:
             print('ERROR: conversion mode "%s" is not supported.' % conv_func_name, file=sys.stderr)
+            if self.verbose >= 3:
+                print(traceback.format_exc(), end='')
             sys.exit(2)
 
         if not isinstance(_output, bytes):
@@ -718,6 +723,7 @@ int main() {
         return _hex
 
     def shellstorm_to_hex(self, shellstorm_id, with_breakpoint=None):
+        global cstr, urlread
         if self.verbose >= 3: print('IN shellstorm_to_hex', file=sys.stderr)
         with_breakpoint = with_breakpoint if with_breakpoint is not None else self.with_breakpoint
 
@@ -726,8 +732,7 @@ int main() {
         # TODO handle shellcode not found
 
         shellstorm_url = self.shellstorm_t % shellstorm_id
-        u = urllib.urlopen(shellstorm_url)
-        content = u.read()
+        content = cstr(urlread(shellstorm_url))
 
         # prefilter some html stuff
         after_pre_idx = content.find('<pre>') + len('<pre>')
