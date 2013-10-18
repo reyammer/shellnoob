@@ -33,7 +33,6 @@ import stat
 import traceback
 import shutil
 import socket
-import urllib
 from tempfile import mktemp, NamedTemporaryFile
 from subprocess import call, Popen, PIPE
 import binascii
@@ -45,15 +44,20 @@ except ImportError:
     pass
 
 if PY2:
+    import urllib2
     input = raw_input
     cbytes = lambda source, encoding='utf-8': bytes(source)
     cstr = lambda source, encoding='utf-8': str(source)
-    urlread = lambda url: urllib.urlopen(url).read()
+    urlread = lambda url: urllib2.urlopen(url).read()
+    HTTPError = urllib2.HTTPError
 else:
+    import urllib
     import urllib.request
+    import urllib.error
     cbytes = lambda source, encoding='utf-8': bytes(source, encoding)
     cstr = lambda source, encoding='utf-8': str(source, encoding)
     urlread = lambda url: urllib.request.urlopen(url).read()
+    HTTPError = urllib.error.HTTPError
 
 ######################
 ### main functions ###
@@ -511,8 +515,11 @@ int main() {
             _output = getattr(self, conv_func_name)(_input)
         except AttributeError as err:
             print('ERROR: conversion mode "%s" is not supported.' % conv_func_name, file=sys.stderr)
-            if self.verbose >= 3:
-                print(traceback.format_exc(), end='')
+            if self.verbose >= 3: print(traceback.format_exc(), end='')
+            sys.exit(2)
+        except ShellNoobException as err:
+            print('%s' % err, file=sys.stderr)
+            if self.verbose >= 3: print(traceback.format_exc(), end='')
             sys.exit(2)
 
         if not isinstance(_output, bytes):
@@ -729,10 +736,11 @@ int main() {
 
         print('WARNING: shellstorm_to_hex just extracts the \\xXX looking parts. Check that everything it\'s fine!', file=sys.stderr)
 
-        # TODO handle shellcode not found
-
         shellstorm_url = self.shellstorm_t % shellstorm_id
-        content = cstr(urlread(shellstorm_url))
+        try:
+            content = cstr(urlread(shellstorm_url))
+        except HTTPError as err:
+            raise ShellNoobException('ERROR: failed fetching shellcode from %s (%s)' % (shellstorm_url, err))
 
         # prefilter some html stuff
         after_pre_idx = content.find('<pre>') + len('<pre>')
