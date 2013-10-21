@@ -636,7 +636,7 @@ int main() {
             vm_address = int(m.group(1), 16)
             file_offset = self.get_file_offset_from_vm_address(exe_fp, vm_address)
             print('Found call to fork @ 0x%x (file offset 0x%x)' % (vm_address, file_offset))
-            self.do_exe_patch(exe_fp, '\x90\x90\x90\x31\xc0', file_offset)
+            self.do_exe_patch(exe_fp, b'\x90\x90\x90\x31\xc0', file_offset)
 
     def do_exe_patch(self, exe_fp, data, file_offset=None, vm_address=None, replace=True):
         if not replace:
