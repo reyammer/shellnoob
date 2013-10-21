@@ -629,13 +629,13 @@ int main() {
     def do_fork_nopper(self, exe_fp):
         lines = os.popen('objdump -d %s' % exe_fp).read().split('\n')
         for line in lines:
-            print(line)
+            if self.verbose >= 1:
+                print(line)
             m = re.search('([0-9a-f]+):\s+[0-9a-f ]+\s+call.*fork', line)
             if not m: continue
             vm_address = int(m.group(1), 16)
-            print('FOUND A CALL TO FORK @ 0x%x' % vm_address)
             file_offset = self.get_file_offset_from_vm_address(exe_fp, vm_address)
-            print('fileoffset @ 0x%x' % file_offset)
+            print('Found call to fork @ 0x%x (file offset 0x%x)' % (vm_address, file_offset))
             self.do_exe_patch(exe_fp, '\x90\x90\x90\x31\xc0', file_offset)
 
     def do_exe_patch(self, exe_fp, data, file_offset=None, vm_address=None, replace=True):
