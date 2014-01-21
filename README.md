@@ -3,13 +3,33 @@
 Writing shellcodes has always been super fun, but some parts are extremely
 boring and error prone. Focus only on the fun part, and use **ShellNoob**! 
 
-Please report all bugs and swears to yanick [AT] cs.ucsb.edu / [@reyammer](https://twitter.com/reyammer).
+For a quick overview, check the slides for the Black Hat Arsenal talk:
+[link](https://media.blackhat.com/us-13/Arsenal/us-13-Fratantonio-ShellNoob-Slides.pdf)
+
+Want to contribute? Feature request? Bug report? Swears? **All** feedback is
+welcome!! (But some kind of feedback is more welcome than others :-)).
+
+Feel free to ping me on twitter [@reyammer](https://twitter.com/reyammer) or to
+email me at yanick[AT]cs.ucsb.edu any questions!
+
+
+## Contributors & Acknowledgments
+
+- Levente Polyak ([@anthraxx42](https://twitter.com/anthraxx42))
+    - added Python 3 support
+    - bug fixes
+- @ToolsWatch & Black Hat crews
+    - They gave me a chance to show off my tool :D
+
 
 ## News
 
-07/29/2013 - ShellNoob 2.0 is out!
+- *01/21/2014* - ShellNoob 2.1 is out! It comes with full support for Python 3 and tons of bug fixes. Full credits go to Levente Polyak!
 
-06/08/2013 - ShellNoob got accepted at Black Hat Arsenal! See announcement here: [link](http://www.blackhat.com/us-13/arsenal.html#Fratantonio).
+- *07/29/2013* - ShellNoob 2.0 is out!
+
+- *06/08/2013* - ShellNoob got accepted at Black Hat Arsenal! See announcement here: [link](http://www.blackhat.com/us-13/arsenal.html#Fratantonio).
+
 
 ## Features
 
@@ -18,7 +38,7 @@ Please report all bugs and swears to yanick [AT] cs.ucsb.edu / [@reyammer](https
 - support for both ATT & Intel syntax. Check the ```--intel``` switch.
 - support for 32 and 64 bits (when playing on x86\_64 machine). Check the ```--64``` switch.
 - resolve syscall numbers, constants, and error numbers (now implemented for real! :-)).
-- portable and easily deployable (it only relies on gcc/as/objdump and python). And it just *one self-contained python script*!
+- portable and easily deployable (it only relies on gcc/as/objdump and python). It is just *one self-contained python script*, and it supports both Python2.7+ and Python3+.
 - in-place development: you run ShellNoob directly on the target architecture!
 - built-in support for Linux/x86, Linux/x86\_64, Linux/ARM, FreeBSD/x86, FreeBSD/x86\_64.
 - "*prepend breakpoint*" option. Check the ```-c``` switch.
@@ -212,10 +232,6 @@ jae 0xa8              # .ascii "se"
 arpl %si,0x65(%edx)   # .ascii "cre"
 je 0xa0               # .ascii "tX
 ```
-
-## Acknowledgments
-
-Huge **THANKS!** to the @ToolsWatch & Black Hat crews! :-)
 
 ## License
 
