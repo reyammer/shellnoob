@@ -130,7 +130,7 @@ Reading symbols from /tmp/tmpZdImWw...(no debugging symbols found)...done.
 ```
 Note how ShellNoob automatically sets a breakpoint on the entry point!
 
-### Get syscall numbers, constants and errno (now implemented for real :-))
+### Get syscall numbers, constants and errno
 ```bash
 $ snoob --get-sysnum read
 i386 ~> 3
