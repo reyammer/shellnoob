@@ -564,7 +564,7 @@ int main() {
             print('------------------------', file=sys.stderr)
 
         if start_addr:
-            cmd = '(echo "break *%s"; cat) | gdb -q %s' % (start_addr, exe_fp)
+            cmd = 'gdb -ex "break *%s" -q %s' % (start_addr, exe_fp)
         else:
             cmd = 'gdb -q %s' % exe_fp
         p = Popen(cmd, shell=True)
