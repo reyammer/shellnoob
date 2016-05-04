@@ -386,6 +386,7 @@ int main() {
     def do_resolve_const(self, const):
         includes = ['sys/types.h',
                     'sys/stat.h',
+                    'sys/mman.h',
                     'fcntl.h',
                    ]
         body = 'printf("%%d", %s); return 0;' % (const)
