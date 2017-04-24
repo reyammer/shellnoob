@@ -169,14 +169,17 @@ class ShellNoob():
 #include <string.h>
 #include <sys/mman.h>
 #include <errno.h>
+#include <malloc.h>
 
 %s
 
+int len = (sizeof(shellcode) > 2048) ?sizeof(shellcode):2048;
+
 int main() {
     // make sure the memory is RWX to support self-modifying shellcode
-    char *target = (char *) memalign(4096, 2048);
-    mprotect(target, 2048, PROT_READ | PROT_WRITE | PROT_EXEC);
-    memcpy(target, shellcode, 2048);
+    char *target = (char *) memalign(4096, len);
+    mprotect(target, len, PROT_READ | PROT_WRITE | PROT_EXEC);
+    memcpy(target, shellcode, len);
     (*(void (*)()) target)();
     return 0;
 }
