@@ -260,6 +260,7 @@ int main() {
         hardware = hardware if hardware is not None else self.hardware
         flag_64_bit = flag_64_bit if flag_64_bit is not None else self.flag_64_bit
         flag_intel = flag_intel if flag_intel is not None else self.flag_intel
+
         for entry, options in self.objdump_options_map.items():
             e_kernel, e_hardware, e_64, e_intel = entry.split('#')
             if not re.search(e_kernel, kernel): continue
