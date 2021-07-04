@@ -109,7 +109,8 @@ class ShellNoob():
         'Linux#x86_64#64#att' : '',
         'Linux#x86_64#64#intel' : '-m i386:x86-64:intel',
         'Linux#arm.*#32#.*' : '',
-        'FreeBSD#i[2-6]?86#32#.*' : ''
+        'FreeBSD#i[2-6]?86#32#.*' : '',
+        'FreeBSD#amd64#32#att' : ''
     }
 
     # {kernel-hardware-flag_64_bit-flag_intel}
@@ -121,7 +122,8 @@ class ShellNoob():
         'Linux#x86_64#64#att' : '',
         'Linux#x86_64#64#intel' : '-msyntax=intel -mnaked-reg',
         'Linux#arm.*#32#.*' : '',
-        'FreeBSD#i[2-6]?86#32#.*' : ''
+        'FreeBSD#i[2-6]?86#32#.*' : '',
+        'FreeBSD#amd64#32#att' : ''
     }
 
     # {kernel-hardware-flag_64_bit-flag_intel}
@@ -130,7 +132,8 @@ class ShellNoob():
         'Linux#x86_64#32#.*' : '-m elf_i386',
         'Linux#x86_64#64#.*' : '',
         'Linux#arm.*#32#.*' : '',
-        'FreeBSD#i[2-6]?86#32#.*' : '-m elf_i386_fbsd'
+        'FreeBSD#i[2-6]?86#32#.*' : '-m elf_i386_fbsd',
+        'FreeBSD#amd64#32#att' : '-m elf_i386_fbsd'
     }
 
     # {kernel-hardware-flag_64_bit-flag_intel}
@@ -257,7 +260,6 @@ int main() {
         hardware = hardware if hardware is not None else self.hardware
         flag_64_bit = flag_64_bit if flag_64_bit is not None else self.flag_64_bit
         flag_intel = flag_intel if flag_intel is not None else self.flag_intel
-
         for entry, options in self.objdump_options_map.items():
             e_kernel, e_hardware, e_64, e_intel = entry.split('#')
             if not re.search(e_kernel, kernel): continue
