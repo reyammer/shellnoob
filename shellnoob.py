@@ -109,7 +109,8 @@ class ShellNoob():
         'Linux#x86_64#64#att' : '',
         'Linux#x86_64#64#intel' : '-m i386:x86-64:intel',
         'Linux#arm.*#32#.*' : '',
-        'FreeBSD#i[2-6]?86#32#.*' : ''
+        'FreeBSD#i[2-6]?86#32#.*' : '',
+        'FreeBSD#amd64#32#att' : ''
     }
 
     # {kernel-hardware-flag_64_bit-flag_intel}
@@ -121,7 +122,8 @@ class ShellNoob():
         'Linux#x86_64#64#att' : '',
         'Linux#x86_64#64#intel' : '-msyntax=intel -mnaked-reg',
         'Linux#arm.*#32#.*' : '',
-        'FreeBSD#i[2-6]?86#32#.*' : ''
+        'FreeBSD#i[2-6]?86#32#.*' : '',
+        'FreeBSD#amd64#32#att' : ''
     }
 
     # {kernel-hardware-flag_64_bit-flag_intel}
@@ -130,7 +132,8 @@ class ShellNoob():
         'Linux#x86_64#32#.*' : '-m elf_i386',
         'Linux#x86_64#64#.*' : '',
         'Linux#arm.*#32#.*' : '',
-        'FreeBSD#i[2-6]?86#32#.*' : '-m elf_i386_fbsd'
+        'FreeBSD#i[2-6]?86#32#.*' : '-m elf_i386_fbsd',
+        'FreeBSD#amd64#32#att' : '-m elf_i386_fbsd'
     }
 
     # {kernel-hardware-flag_64_bit-flag_intel}
