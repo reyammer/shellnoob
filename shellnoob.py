@@ -533,7 +533,7 @@ int main() {
             _output = cbytes(_output)
         # writing the output
         if output_fp == '-':
-            sys.stdout.write(_output)
+            sys.stdout.write(_output.decode(sys.stdout.encoding))
         else:
             open(output_fp, 'wb').write(_output)
 
