@@ -602,7 +602,7 @@ int main() {
         lines = os.popen('readelf -S %s' % exe_fp).read().split('\n')
         if bits == 32:
             for line in lines:
-                m = re.search('.text\s+\w+\s+([0-9a-f]+)\s+([0-9a-f]+)\s+([0-9a-f]+)', line)
+                m = re.search(r'.text\s+\w+\s+([0-9a-f]+)\s+([0-9a-f]+)\s+([0-9a-f]+)', line)
                 if not m: continue
                 vm_address = int(m.group(1), 16)
                 file_offset = int(m.group(2), 16)
@@ -611,13 +611,13 @@ int main() {
         elif bits == 64:
             for line in lines:
                 if vm_address is None and file_offset is None:
-                    m = re.search('.text\s+\w+\s+([0-9a-f]+)\s+([0-9a-f]+)', line)
+                    m = re.search(r'.text\s+\w+\s+([0-9a-f]+)\s+([0-9a-f]+)', line)
                     if not m: continue
                     vm_address = int(m.group(1), 16)
                     file_offset = int(m.group(2), 16)
                     continue
                 else:
-                    m = re.search('\s+([0-9a-f]+)\s+[0-9a-f]+', line)
+                    m = re.search(r'\s+([0-9a-f]+)\s+[0-9a-f]+', line)
                     if not m: raise Exception('error while parsing readelf -S (64bit)')
                     size = int(m.group(1), 16)
                     break
@@ -638,7 +638,7 @@ int main() {
         for line in lines:
             if self.verbose >= 1:
                 print(line)
-            m = re.search('([0-9a-f]+):\s+[0-9a-f ]+\s+call.*fork', line)
+            m = re.search(r'([0-9a-f]+):\s+[0-9a-f ]+\s+call.*fork', line)
             if not m: continue
             vm_address = int(m.group(1), 16)
             file_offset = self.get_file_offset_from_vm_address(exe_fp, vm_address)
@@ -1026,7 +1026,7 @@ int main() {
             comment_char = self.get_comment_as_char()
 
             # asm started
-            m = re.search('[0-9a-f]+:\s+([0-9a-f ]+)\t(.*)$', line)
+            m = re.search(r'[0-9a-f]+:\s+([0-9a-f ]+)\t(.*)$', line)
             if not m:
                 continue
             _hex = m.group(1).replace(' ', '').strip(' \t\n')
@@ -1244,7 +1244,7 @@ int main() {
         _out = cstr(_out)
         for line in _out.split('\n'):
             line = line.strip(' \t\n')
-            m = re.search('^start address (0x[0-9a-f]+)$', line)
+            m = re.search(r'^start address (0x[0-9a-f]+)$', line)
             if not m: continue
             start_addr = m.group(1)
             return start_addr
